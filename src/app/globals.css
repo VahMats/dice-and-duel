@@ -1,26 +1,137 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ------------------------------------------------------------------ */
+/* Brand theme — taken from the Dice and Duel logo and event posters   */
+/* ------------------------------------------------------------------ */
+@theme {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* Wood */
+  --color-walnut-950: #23150c; /* page background */
+  --color-walnut-900: #2e1c10; /* cards */
+  --color-walnut-800: #4a2e1c; /* raised surfaces, hover */
+  --color-walnut-700: #5c3a24;
+
+  /* Metal */
+  --color-copper: #c0662b; /* frames, dividers — lines only, not text */
+  --color-copper-light: #d88a4e; /* labels, small headings */
+
+  /* Paper */
+  --color-parchment: #ebd9b4; /* main text */
+  --color-parchment-muted: #c9b48e; /* secondary text, 8.8:1 on walnut-950 */
+  --color-cream: #f6ebd2; /* headings */
+
+  /* Action */
+  --color-rust: #a9531e; /* buttons, badges (cream text 6.3:1) */
+  --color-rust-dark: #8a4318;
+
+  /* Game-piece accents */
+  --color-piece-green: #5e9a3e;
+  --color-piece-yellow: #e3ae2b;
+  --color-piece-red: #b32a1e;
+  --color-piece-blue: #2457a6;
+  --color-piece-orange: #e07a2a;
+  --color-piece-cream: #f6ebd2;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Latin-only brand wordmark ("Dice and Duel"). Cinzel has no Cyrillic/Armenian. */
+  --font-brand: var(--font-cinzel), var(--font-cormorant), serif;
+  /* Headings: Cormorant SC covers Latin + Cyrillic, Noto Serif Armenian covers Armenian. */
+  --font-heading: var(--font-cormorant), var(--font-noto-serif-armenian), serif;
+  /* Body: Noto Sans covers Latin + Cyrillic, Noto Sans Armenian covers Armenian. */
+  --font-sans: var(--font-noto-sans), var(--font-noto-sans-armenian), sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Armenian pages: let the Armenian serif lead so digits/punctuation match. */
+:lang(hy) {
+  --font-heading: var(--font-noto-serif-armenian), var(--font-cormorant), serif;
+  --font-sans: var(--font-noto-sans-armenian), var(--font-noto-sans), sans-serif;
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    background-color: var(--color-walnut-950);
+    /* Very subtle horizontal wood grain */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.002 0.09' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.92 0 0 0 0 0.75 0 0 0 0 0.55 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23g)' opacity='0.09'/%3E%3C/svg%3E");
+    color: var(--color-parchment);
+  }
+
+  ::selection {
+    background: var(--color-rust);
+    color: var(--color-cream);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-copper-light);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    color: var(--color-cream);
+    text-wrap: balance;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ------------------------------------------------------------------ */
+/* Copper double frame (thick outer line + thin inner line)            */
+/* ------------------------------------------------------------------ */
+@utility copper-frame {
+  position: relative;
+  border: 3px solid var(--color-copper);
+  background-color: var(--color-walnut-900);
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border: 1px solid color-mix(in srgb, var(--color-copper-light) 55%, transparent);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+}
+
+/* Small copper diamonds in the corners of a frame */
+@utility frame-corners {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    pointer-events: none;
+    background:
+      linear-gradient(45deg, transparent 40%, var(--color-copper-light) 40% 60%, transparent 60%) top left / 9px 9px no-repeat,
+      linear-gradient(45deg, transparent 40%, var(--color-copper-light) 40% 60%, transparent 60%) top right / 9px 9px no-repeat,
+      linear-gradient(45deg, transparent 40%, var(--color-copper-light) 40% 60%, transparent 60%) bottom left / 9px 9px no-repeat,
+      linear-gradient(45deg, transparent 40%, var(--color-copper-light) 40% 60%, transparent 60%) bottom right / 9px 9px no-repeat;
+  }
+}
+
+/* Parchment-style placeholder surface (game images, creator photos) */
+@utility parchment-surface {
+  background-color: #e3cfa5;
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgb(255 255 255 / 0.35), transparent 60%),
+    radial-gradient(ellipse at 80% 90%, rgb(120 70 30 / 0.25), transparent 55%);
+  color: var(--color-walnut-800);
 }
